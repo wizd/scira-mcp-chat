@@ -1,8 +1,8 @@
 "use server";
 
-import { openai } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { z } from "zod";
+import { model, defaultModel, type modelID } from "@/ai/providers";
 
 // Helper to extract text content from a message regardless of format
 function getMessageText(message: any): string {
@@ -35,15 +35,18 @@ function getMessageText(message: any): string {
   return '';
 }
 
-export async function generateTitle(messages: any[]) {
+export async function generateTitle(messages: any[], selectedModel?: modelID) {
   // Convert messages to a format that OpenAI can understand
   const normalizedMessages = messages.map(msg => ({
     role: msg.role,
     content: getMessageText(msg)
   }));
   
+  // Determine which model to use, fallback to defaultModel
+  const modelId = selectedModel ?? defaultModel;
+  const languageModel = model.languageModel(modelId);
   const { object } = await generateObject({
-    model: openai("gpt-4.1"),
+    model: languageModel,
     schema: z.object({
       title: z.string().min(1).max(100),
     }),

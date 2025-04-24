@@ -3,6 +3,7 @@ import { chats, messages, type Chat, type Message, MessageRole, type MessagePart
 import { eq, desc, and } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { generateTitle } from "@/app/actions";
+import type { modelID } from "@/ai/providers";
 
 type AIMessage = {
   role: string;
@@ -24,6 +25,7 @@ type SaveChatParams = {
   userId: string;
   messages?: any[];
   title?: string;
+  selectedModel?: modelID;
 };
 
 type ChatWithMessages = Chat & {
@@ -110,7 +112,7 @@ export function convertToUIMessages(dbMessages: Array<Message>): Array<UIMessage
   }));
 }
 
-export async function saveChat({ id, userId, messages: aiMessages, title }: SaveChatParams) {
+export async function saveChat({ id, userId, messages: aiMessages, title, selectedModel }: SaveChatParams) {
   // Generate a new ID if one wasn't provided
   const chatId = id || nanoid();
   
@@ -127,7 +129,7 @@ export async function saveChat({ id, userId, messages: aiMessages, title }: Save
       if (hasEnoughMessages) {
         try {
           // Use AI to generate a meaningful title based on conversation
-          chatTitle = await generateTitle(aiMessages);
+          chatTitle = await generateTitle(aiMessages, selectedModel);
         } catch (error) {
           console.error('Error generating title:', error);
           // Fallback to basic title extraction if AI title generation fails

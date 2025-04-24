@@ -246,6 +246,7 @@ export async function POST(req: Request) {
         id,
         userId,
         messages: allMessages,
+        selectedModel,
       });
 
       const dbMessages = convertToDBMessages(allMessages, id);
